@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Elite Admin Panel</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+body{
+  background:black;
+  color:#00ff99;
+  font-family:monospace;
+}
+
+.card{
+  width:90%;
+  margin:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+td,th{
+  border:1px solid #00ff99;
+  padding:10px;
+  text-align:left;
+}
+
+h1{
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🔥 ELITE ADMIN CONTROL PANEL</h1>
+
+<button onclick="loadUsers()">Show Members</button>
+
+<table>
+<thead>
+<tr>
+<th>Email</th>
+<th>Paid</th>
+<th>Role</th>
+</tr>
+</thead>
+
+<tbody id="users"></tbody>
+</table>
+
+</div>
+
+<script>
+async function loadUsers(){
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch("/api/users",{
+    headers:{
+      "Authorization":"Bearer " + token
+    }
+  });
+
+  if(!res.ok){
+    alert("Admin access required");
+    window.location="login.html";
+    return;
+  }
+
+  const users = await res.json();
+
+  const table = document.getElementById("users");
+  table.innerHTML = "";
+
+  users.forEach(u=>{
+    table.innerHTML += `
+      <tr>
+        <td>${u.email}</td>
+        <td>${u.paid}</td>
+        <td>${u.role}</td>
+      </tr>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="box">
+<h2>Member Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password">
+
+<button onclick="login()">Login</button>
+
+<p id="error"></p>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
+<script>
+const token = localStorage.getItem("token");
+
+if(token){
+  window.location="dashboard.html";
+}
+</script>

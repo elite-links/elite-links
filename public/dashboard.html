@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>Members Area</h1>
+
+<a href="https://drive.google.com" target="_blank">
+Download Files
+</a>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
+<button onclick="logout()">Logout</button>
+
+<script>
+function logout(){
+  localStorage.removeItem("token");
+  window.location="login.html";
+}
+</script>
