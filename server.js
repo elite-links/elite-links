@@ -25,9 +25,7 @@ app.use(express.static("public"));
 /* ==============================
    ENSURE UPLOAD FOLDER EXISTS
 ============================== */
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
+fs.mkdirSync("uploads", { recursive: true });
 
 /* ==============================
    DATABASE CONNECTION
@@ -52,7 +50,6 @@ const User = mongoose.model("User",userSchema);
    AUTH MIDDLEWARE
 ============================== */
 function auth(req,res,next){
-
   const header = req.headers.authorization;
 
   if(!header || !header.startsWith("Bearer "))
@@ -114,7 +111,6 @@ app.use("/uploads",express.static("uploads"));
 ============================== */
 app.post("/api/register", async(req,res)=>{
 try{
-
   const {email,password} = req.body;
 
   if(!email || !password)
@@ -140,7 +136,6 @@ try{
 ============================== */
 app.post("/api/login", async(req,res)=>{
 try{
-
   const {email,password} = req.body;
 
   const user = await User.findOne({email});
@@ -218,11 +213,12 @@ app.get("/api/test",(req,res)=>{
    GLOBAL ERROR HANDLER
 ============================== */
 app.use((err,req,res,next)=>{
+  console.error(err);
+
   if(err instanceof multer.MulterError)
     return res.status(400).send(err.message);
 
-  if(err)
-    return res.status(400).send(err.message);
+  res.status(500).send(err.message || "Server error");
 });
 
 /* ==============================
