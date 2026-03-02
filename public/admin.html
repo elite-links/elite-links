@@ -3,8 +3,6 @@
 <head>
 <title>Elite Admin Panel</title>
 
-<link rel="stylesheet" href="style.css">
-
 <style>
 body{
   background:black;
@@ -13,13 +11,15 @@ body{
 }
 
 .card{
-  width:90%;
+  max-width:900px;
   margin:auto;
+  padding:20px;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
+  margin-top:20px;
 }
 
 td,th{
@@ -30,6 +30,14 @@ td,th{
 
 h1{
   text-align:center;
+}
+
+button{
+  background:#00ff99;
+  border:none;
+  padding:10px 15px;
+  cursor:pointer;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -57,9 +65,16 @@ h1{
 </div>
 
 <script>
+
 async function loadUsers(){
 
   const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Login required");
+    window.location="login.html";
+    return;
+  }
 
   const res = await fetch("/api/users",{
     headers:{
@@ -88,6 +103,7 @@ async function loadUsers(){
     `;
   });
 }
+
 </script>
 
 </body>
