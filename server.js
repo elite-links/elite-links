@@ -220,3 +220,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+const express = require("express");
+const path = require("path");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ✅ serve public folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// your homepage
+app.get("/", (req, res) => {
+  res.send("Elite Links is running");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
