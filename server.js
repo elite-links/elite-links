@@ -4,7 +4,7 @@
 require("dotenv").config();
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
-  console.error("❌ Missing MONGO_URI or JWT_SECRET in .env");
+  console.error("❌ Missing MONGO_URI or JWT_SECRET");
   process.exit(1);
 }
 
@@ -41,7 +41,7 @@ app.use(
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ==============================
-   UPLOAD FOLDER
+   UPLOADS
 ============================== */
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -54,47 +54,47 @@ app.use("/uploads", express.static(UPLOAD_DIR));
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => {
-    console.error("❌ DB ERROR:", err);
+  .catch(err => {
+    console.error(err);
     process.exit(1);
   });
 
 /* ==============================
-   USER MODEL
+   MODELS
 ============================== */
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  paid: { type: Boolean, default: false },
-  role: { type: String, default: "user" },
-});
+const User = mongoose.model(
+  "User",
+  new mongoose.Schema({
+    email: { type: String, unique: true },
+    password: String,
+    paid: { type: Boolean, default: false },
+    role: { type: String, default: "user" }
+  })
+);
 
-const User = mongoose.model("User", userSchema);
+const Profile = mongoose.model(
+  "Profile",
+  new mongoose.Schema({
+    userId: String,
+    username: { type: String, unique: true },
+    about: String,
+    facebook: String,
+    instagram: String,
+    tiktok: String,
+    youtube: String,
+    shop: String,
+    website: String,
+    links: [{ title: String, url: String }]
+  })
+);
 
 /* ==============================
-   PROFILE MODEL
-============================== */
-const profileSchema = new mongoose.Schema({
-  userId: String,
-  username: String,
-  facebook: String,
-  instagram: String,
-  tiktok: String,
-  youtube: String,
-  shop: String,
-  website: String,
-  about: String,
-});
-
-const Profile = mongoose.model("Profile", profileSchema);
-
-/* ==============================
-   AUTH MIDDLEWARE (JWT)
+   AUTH MIDDLEWARE
 ============================== */
 function auth(req, res, next) {
   const header = req.headers.authorization;
 
-  if (!header || !header.startsWith("Bearer "))
+  if (!header?.startsWith("Bearer "))
     return res.status(401).json({ error: "No token" });
 
   try {
@@ -106,19 +106,13 @@ function auth(req, res, next) {
   }
 }
 
-/* ==============================
-   SESSION AUTH
-============================== */
 function sessionAuth(req, res, next) {
-  if (!req.session.user) {
+  if (!req.session.user)
     return res.redirect("/login.html");
-  }
+
   next();
 }
 
-/* ==============================
-   ADMIN CHECK
-============================== */
 function admin(req, res, next) {
   if (req.user.role !== "admin")
     return res.status(403).json({ error: "Admin only" });
@@ -129,57 +123,47 @@ function admin(req, res, next) {
 /* ==============================
    MULTER
 ============================== */
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, UPLOAD_DIR),
-  filename: (_, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname)),
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_, file, cb) => {
-    const allowed = ["image/png", "image/jpeg", "application/pdf"];
-
-    allowed.includes(file.mimetype)
-      ? cb(null, true)
-      : cb(new Error("File not allowed"));
-  },
+  storage: multer.diskStorage({
+    destination: (_, __, cb) => cb(null, UPLOAD_DIR),
+    filename: (_, file, cb) =>
+      cb(null, Date.now() + path.extname(file.originalname))
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 /* ==============================
    ROUTES
 ============================== */
 
-// Home
+/* ---- HOME ---- */
 app.get("/", (_, res) => {
-  res.send("🔥 Elite Links is running");
+  res.send("🔥 Elite Links running");
 });
 
-/* -------- REGISTER -------- */
-app.post("/api/register", async (req, res) => {
+/* ---- REGISTER ---- */
+app.post("/api/register", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password)
       return res.status(400).json({ error: "Missing data" });
 
-    const exists = await User.findOne({ email });
-    if (exists)
+    if (await User.findOne({ email }))
       return res.status(400).json({ error: "User exists" });
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 10);
 
-    await User.create({ email, password: hashed });
+    await User.create({ email, password: hash });
 
-    res.json({ message: "✅ User Registered" });
-  } catch {
-    res.status(500).json({ error: "Server error" });
+    res.json({ message: "✅ Registered" });
+  } catch (err) {
+    next(err);
   }
 });
 
-/* -------- LOGIN -------- */
-app.post("/api/login", async (req, res) => {
+/* ---- LOGIN ---- */
+app.post("/api/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -187,8 +171,7 @@ app.post("/api/login", async (req, res) => {
     if (!user)
       return res.status(401).json({ error: "User not found" });
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid)
+    if (!(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: "Wrong password" });
 
     if (!user.paid)
@@ -202,106 +185,95 @@ app.post("/api/login", async (req, res) => {
 
     req.session.user = user._id;
 
-    res.json({ token, message: "Login success" });
-  } catch {
-    res.status(500).json({ error: "Server error" });
+    res.json({ token });
+  } catch (err) {
+    next(err);
   }
 });
 
-/* -------- DASHBOARD -------- */
+/* ---- DASHBOARD API ---- */
 app.get("/api/dashboard", auth, (_, res) => {
-  res.json({ message: "🔥 Elite Member Access Granted" });
+  res.json({ message: "🔥 Member Access Granted" });
 });
 
-/* -------- ADMIN -------- */
-app.get("/api/admin", auth, admin, (_, res) => {
-  res.json({ message: "👑 Admin Panel Access" });
-});
+/* ---- ADMIN ---- */
+app.get("/api/admin", auth, admin, (_, res) =>
+  res.json({ message: "👑 Admin Panel" })
+);
 
-/* -------- USERS LIST -------- */
 app.get("/api/users", auth, admin, async (_, res) => {
   const users = await User.find().select("-password");
   res.json(users);
 });
 
-/* -------- FILE UPLOAD -------- */
+/* ---- FILE UPLOAD ---- */
 app.post("/api/upload", auth, upload.single("file"), (req, res) => {
-  res.json({
-    message: "Upload success",
-    file: req.file.filename,
-    url: `/uploads/${req.file.filename}`,
-  });
+  res.json({ url: `/uploads/${req.file.filename}` });
 });
 
-/* -------- CREATE PROFILE -------- */
-app.post("/create-profile", async (req, res) => {
+/* ---- CREATE PROFILE ---- */
+app.post("/create-profile", sessionAuth, async (req, res, next) => {
   try {
-    if (!req.session.user)
-      return res.status(401).send("Login required");
-
     await Profile.create({
       userId: req.session.user,
-      ...req.body,
+      ...req.body
     });
 
-    res.redirect("/create.html");
+    res.redirect("/dashboard.html");
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Profile save failed");
+    next(err);
   }
 });
 
-/* -------- SESSION DASHBOARD PAGE -------- */
+/* ---- DASHBOARD PAGE ---- */
 app.get("/dashboard.html", sessionAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-/* -------- TEST -------- */
-app.get("/api/test", (_, res) => {
-  res.json({ message: "Server Working ✅" });
+/* ---- SITEMAP ---- */
+app.get("/sitemap.xml", async (_, res) => {
+  const profiles = await Profile.find();
+
+  const urls = profiles.map(p => `
+    <url>
+      <loc>https://elite-links.onrender.com/${p.username}</loc>
+    </url>
+  `).join("");
+
+  res.header("Content-Type", "application/xml");
+
+  res.send(`
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`);
 });
 
-/* ==============================
-   GLOBAL ERROR HANDLER
-============================== */
-app.use((err, req, res, next) => {
-  console.error(err);
-
-  if (err instanceof multer.MulterError)
-    return res.status(400).json({ error: err.message });
-
-  res.status(500).json({ error: err.message || "Server error" });
-});
-
-/* ==============================
-   START SERVER (LAST!)
-============================== */
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-app.get("/u/:username", async (req, res) => {
-
+/* ---- PUBLIC PROFILE (MUST BE LAST ROUTE) ---- */
+app.get("/:username", async (req, res) => {
   const profile = await Profile.findOne({
     username: req.params.username
   });
 
-  if (!profile) {
-    return res.send("Profile not found");
-  }
+  if (!profile)
+    return res.status(404).send("Profile not found");
 
-  res.send(`
-    <h1>${profile.username}</h1>
+  res.sendFile(path.join(__dirname, "public", "profile.html"));
+});
 
-    <a href="${profile.facebook}">Facebook</a><br>
-    <a href="${profile.instagram}">Instagram</a><br>
-    <a href="${profile.tiktok}">TikTok</a><br>
-    <a href="${profile.youtube}">YouTube</a><br>
-    <a href="${profile.shop}">Shop</a><br>
-    <a href="${profile.website}">Website</a><br>
+/* ==============================
+   ERROR HANDLER
+============================== */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: err.message });
+});
 
-    <p>${profile.about}</p>
-  `);
+/* ==============================
+   START SERVER
+============================== */
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 http://localhost:${PORT}`);
 });

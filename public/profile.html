@@ -1,0 +1,17 @@
+<h1 id="name"></h1>
+<div id="links"></div>
+
+<script>
+const username = location.pathname.replace("/","");
+
+fetch("/api/"+username)
+.then(r=>r.json())
+.then(data=>{
+ document.getElementById("name").innerText=data.username;
+
+ data.links.forEach(link=>{
+   document.getElementById("links").innerHTML+=
+   `<a href="${link.url}">${link.title}</a><br>`;
+ });
+});
+</script>

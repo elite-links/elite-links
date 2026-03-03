@@ -47,6 +47,7 @@ max-width:420px;
 padding:25px;
 text-align:center;
 animation:fadeIn .7s ease;
+position:relative; /* FIXED theme button position */
 }
 
 /* ===================================
@@ -106,10 +107,8 @@ border-radius:14px;
 text-decoration:none;
 font-weight:600;
 color:var(--text);
-
 background:var(--card);
 backdrop-filter:blur(14px);
-
 box-shadow:var(--shadow);
 transition:.3s;
 position:relative;

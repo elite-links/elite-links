@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -8,23 +9,58 @@
 <body>
 
 <div class="box">
-<h2>Member Login</h2>
+  <h2>Member Login</h2>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password">
+  <form id="loginForm">
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="password" type="password" placeholder="Password" required>
 
-<button onclick="login()">Login</button>
+    <button type="submit">Login</button>
+  </form>
 
-<p id="error"></p>
+  <p id="error"></p>
 </div>
 
-<script src="app.js"></script>
+<script>
+/* Redirect if already logged in */
+const token = localStorage.getItem("token");
+if (token) {
+  window.location = "dashboard.html";
+}
+
+/* Login handler */
+document.getElementById("loginForm")
+.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = Object.fromEntries(new FormData(e.target));
+  const errorEl = document.getElementById("error");
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      errorEl.textContent = result.message || "Login failed";
+      return;
+    }
+
+    /* Save login data */
+    localStorage.setItem("token", result.token);
+    localStorage.setItem("username", result.username);
+
+    window.location = "dashboard.html";
+
+  } catch (err) {
+    errorEl.textContent = "Server error";
+  }
+});
+</script>
+
 </body>
 </html>
-<script>
-const token = localStorage.getItem("token");
-
-if(token){
-  window.location="dashboard.html";
-}
-</script>
