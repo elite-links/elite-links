@@ -281,3 +281,27 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+app.get("/u/:username", async (req, res) => {
+
+  const profile = await Profile.findOne({
+    username: req.params.username
+  });
+
+  if (!profile) {
+    return res.send("Profile not found");
+  }
+
+  res.send(`
+    <h1>${profile.username}</h1>
+
+    <a href="${profile.facebook}">Facebook</a><br>
+    <a href="${profile.instagram}">Instagram</a><br>
+    <a href="${profile.tiktok}">TikTok</a><br>
+    <a href="${profile.youtube}">YouTube</a><br>
+    <a href="${profile.shop}">Shop</a><br>
+    <a href="${profile.website}">Website</a><br>
+
+    <p>${profile.about}</p>
+  `);
+});
