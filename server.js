@@ -25,6 +25,8 @@ const app = express();
    MIDDLEWARE
 ============================== */
 app.use(express.json());
+
+/* serve public folder */
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ==============================
@@ -32,6 +34,7 @@ app.use(express.static(path.join(__dirname, "public")));
 ============================== */
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
 app.use("/uploads", express.static(UPLOAD_DIR));
 
 /* ==============================
@@ -67,8 +70,7 @@ function auth(req, res, next) {
 
   try {
     const token = header.split(" ")[1];
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch {
     res.status(403).json({ error: "Invalid token" });
@@ -113,7 +115,7 @@ const upload = multer({
    ROUTES
 ============================== */
 
-// Home
+// Home page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -136,7 +138,6 @@ app.post("/api/register", async (req, res) => {
 
     res.json({ message: "✅ User Registered" });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -164,8 +165,7 @@ app.post("/api/login", async (req, res) => {
     );
 
     res.json({ token });
-  } catch (err) {
-    console.error(err);
+  } catch {
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -175,35 +175,25 @@ app.get("/api/dashboard", auth, (req, res) => {
   res.json({ message: "🔥 Elite Member Access Granted" });
 });
 
-// Admin Panel
+// Admin
 app.get("/api/admin", auth, admin, (req, res) => {
   res.json({ message: "👑 Admin Panel Access" });
 });
 
-// All Users
+// Users list
 app.get("/api/users", auth, admin, async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
+  const users = await User.find().select("-password");
+  res.json(users);
 });
 
 // Upload
-app.post(
-  "/api/upload",
-  auth,
-  upload.single("file"),
-  (req, res) => {
-    res.json({
-      message: "Upload success",
-      file: req.file.filename,
-      url: `/uploads/${req.file.filename}`
-    });
-  }
-);
+app.post("/api/upload", auth, upload.single("file"), (req, res) => {
+  res.json({
+    message: "Upload success",
+    file: req.file.filename,
+    url: `/uploads/${req.file.filename}`
+  });
+});
 
 // Test
 app.get("/api/test", (_, res) => {
