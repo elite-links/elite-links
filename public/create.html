@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Profile</title>
+</head>
+
+<body>
+
+<h2>Create Your Elite Profile</h2>
+
+<form id="profileForm">
+
+<input type="text" name="username" placeholder="Username" required><br><br>
+
+<input type="text" name="facebook" placeholder="Facebook Link"><br>
+<input type="text" name="instagram" placeholder="Instagram Link"><br>
+<input type="text" name="tiktok" placeholder="TikTok Link"><br>
+<input type="text" name="youtube" placeholder="YouTube Link"><br>
+
+<input type="text" name="shop" placeholder="Shop Link"><br>
+<input type="text" name="website" placeholder="Website"><br>
+
+<textarea name="about" placeholder="About Me"></textarea><br><br>
+
+<button type="submit">Save Profile</button>
+
+</form>
+
+<script>
+document.getElementById("profileForm")
+.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = Object.fromEntries(
+    new FormData(e.target)
+  );
+
+  const res = await fetch("/create-profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  alert(await res.text());
+});
+</script>
+
+</body>
+</html>

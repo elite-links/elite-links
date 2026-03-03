@@ -16,6 +16,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
 
@@ -26,11 +27,21 @@ const app = express();
 ============================== */
 app.use(express.json());
 
-/* serve public folder */
+app.use(
+  session({
+    secret: "elite-links-secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+/* ==============================
+   STATIC FILES
+============================== */
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ==============================
-   ENSURE UPLOAD FOLDER EXISTS
+   UPLOAD FOLDER
 ============================== */
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -38,14 +49,15 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 app.use("/uploads", express.static(UPLOAD_DIR));
 
 /* ==============================
-   DATABASE CONNECTION
+   DATABASE
 ============================== */
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("✅ MongoDB Connected"))
-.catch(err => {
-  console.error("❌ DB ERROR:", err);
-  process.exit(1);
-});
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => {
+    console.error("❌ DB ERROR:", err);
+    process.exit(1);
+  });
 
 /* ==============================
    USER MODEL
@@ -54,13 +66,30 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   paid: { type: Boolean, default: false },
-  role: { type: String, default: "user" }
+  role: { type: String, default: "user" },
 });
 
 const User = mongoose.model("User", userSchema);
 
 /* ==============================
-   AUTH MIDDLEWARE
+   PROFILE MODEL
+============================== */
+const profileSchema = new mongoose.Schema({
+  userId: String,
+  username: String,
+  facebook: String,
+  instagram: String,
+  tiktok: String,
+  youtube: String,
+  shop: String,
+  website: String,
+  about: String,
+});
+
+const Profile = mongoose.model("Profile", profileSchema);
+
+/* ==============================
+   AUTH MIDDLEWARE (JWT)
 ============================== */
 function auth(req, res, next) {
   const header = req.headers.authorization;
@@ -78,49 +107,56 @@ function auth(req, res, next) {
 }
 
 /* ==============================
-   ADMIN MIDDLEWARE
+   SESSION AUTH
 ============================== */
-function admin(req, res, next) {
-  if (req.user.role !== "admin")
-    return res.status(403).json({ error: "Admin only" });
+function sessionAuth(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect("/login.html");
+  }
   next();
 }
 
 /* ==============================
-   MULTER CONFIG
+   ADMIN CHECK
+============================== */
+function admin(req, res, next) {
+  if (req.user.role !== "admin")
+    return res.status(403).json({ error: "Admin only" });
+
+  next();
+}
+
+/* ==============================
+   MULTER
 ============================== */
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, UPLOAD_DIR),
   filename: (_, file, cb) =>
-    cb(null, Date.now() + path.extname(file.originalname))
+    cb(null, Date.now() + path.extname(file.originalname)),
 });
 
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_, file, cb) => {
-    const allowed = [
-      "image/png",
-      "image/jpeg",
-      "application/pdf"
-    ];
+    const allowed = ["image/png", "image/jpeg", "application/pdf"];
 
     allowed.includes(file.mimetype)
       ? cb(null, true)
       : cb(new Error("File not allowed"));
-  }
+  },
 });
 
 /* ==============================
    ROUTES
 ============================== */
 
-// Home page
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+// Home
+app.get("/", (_, res) => {
+  res.send("🔥 Elite Links is running");
 });
 
-// Register
+/* -------- REGISTER -------- */
 app.post("/api/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -137,12 +173,12 @@ app.post("/api/register", async (req, res) => {
     await User.create({ email, password: hashed });
 
     res.json({ message: "✅ User Registered" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// Login
+/* -------- LOGIN -------- */
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -164,38 +200,63 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    req.session.user = user._id;
+
+    res.json({ token, message: "Login success" });
   } catch {
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// Dashboard
-app.get("/api/dashboard", auth, (req, res) => {
+/* -------- DASHBOARD -------- */
+app.get("/api/dashboard", auth, (_, res) => {
   res.json({ message: "🔥 Elite Member Access Granted" });
 });
 
-// Admin
-app.get("/api/admin", auth, admin, (req, res) => {
+/* -------- ADMIN -------- */
+app.get("/api/admin", auth, admin, (_, res) => {
   res.json({ message: "👑 Admin Panel Access" });
 });
 
-// Users list
-app.get("/api/users", auth, admin, async (req, res) => {
+/* -------- USERS LIST -------- */
+app.get("/api/users", auth, admin, async (_, res) => {
   const users = await User.find().select("-password");
   res.json(users);
 });
 
-// Upload
+/* -------- FILE UPLOAD -------- */
 app.post("/api/upload", auth, upload.single("file"), (req, res) => {
   res.json({
     message: "Upload success",
     file: req.file.filename,
-    url: `/uploads/${req.file.filename}`
+    url: `/uploads/${req.file.filename}`,
   });
 });
 
-// Test
+/* -------- CREATE PROFILE -------- */
+app.post("/create-profile", async (req, res) => {
+  try {
+    if (!req.session.user)
+      return res.status(401).send("Login required");
+
+    await Profile.create({
+      userId: req.session.user,
+      ...req.body,
+    });
+
+    res.redirect("/create.html");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Profile save failed");
+  }
+});
+
+/* -------- SESSION DASHBOARD PAGE -------- */
+app.get("/dashboard.html", sessionAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+/* -------- TEST -------- */
 app.get("/api/test", (_, res) => {
   res.json({ message: "Server Working ✅" });
 });
@@ -213,28 +274,10 @@ app.use((err, req, res, next) => {
 });
 
 /* ==============================
-   START SERVER
+   START SERVER (LAST!)
 ============================== */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-const express = require("express");
-const path = require("path");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ✅ serve public folder
-app.use(express.static(path.join(__dirname, "public")));
-
-// your homepage
-app.get("/", (req, res) => {
-  res.send("Elite Links is running");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
