@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>My Linktree</title>
+<title>Elite Links - Create Your Link Profile</title>
+
+<meta name="description"
+content="Create your free link profile and share all your social links in one place. Elite Links is a simple link in bio platform.">
+
+<meta name="keywords"
+content="link in bio, linktree alternative, social links, creator profile">
+
+<meta name="robots" content="index, follow">
 
 <!-- Font Awesome -->
 <link rel="stylesheet"
@@ -14,119 +23,119 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 /* RESET */
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
 }
 
 /* BODY */
 body{
-    background:#0f0f0f;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:100vh;
-    transition:0.3s;
+background:#0f0f0f;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+min-height:100vh;
+transition:0.3s;
 }
 
 /* LIGHT MODE */
 body.light{
-    background:#f4f4f4;
-    color:#111;
+background:#f4f4f4;
+color:#111;
 }
 
 /* CONTAINER */
 .container{
-    width:90%;
-    max-width:400px;
-    text-align:center;
-    margin-top:40px;
+width:90%;
+max-width:400px;
+text-align:center;
+margin-top:40px;
 }
 
 /* THEME BUTTON */
 .theme-btn{
-    position:absolute;
-    right:20px;
-    top:20px;
-    border:none;
-    background:#222;
-    color:white;
-    padding:10px;
-    border-radius:50%;
-    cursor:pointer;
+position:absolute;
+right:20px;
+top:20px;
+border:none;
+background:#222;
+color:white;
+padding:10px;
+border-radius:50%;
+cursor:pointer;
 }
 
 body.light .theme-btn{
-    background:#ddd;
-    color:#111;
+background:#ddd;
+color:#111;
 }
 
 /* PROFILE */
 .profile img{
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    margin-bottom:15px;
+width:120px;
+height:120px;
+border-radius:50%;
+margin-bottom:15px;
 }
 
 .profile h2{
-    margin-bottom:10px;
+margin-bottom:10px;
 }
 
 /* SOCIALS */
 .socials a{
-    margin:0 10px;
-    color:inherit;
-    font-size:22px;
-    transition:0.3s;
+margin:0 10px;
+color:inherit;
+font-size:22px;
+transition:0.3s;
 }
 
 .socials a:hover{
-    transform:scale(1.2);
+transform:scale(1.2);
 }
 
 /* LINKS */
 .links{
-    margin-top:25px;
+margin-top:25px;
 }
 
 .link{
-    display:block;
-    background:#1e1e1e;
-    margin:12px 0;
-    padding:15px;
-    border-radius:10px;
-    text-decoration:none;
-    color:white;
-    font-weight:bold;
-    transition:0.3s;
+display:block;
+background:#1e1e1e;
+margin:12px 0;
+padding:15px;
+border-radius:10px;
+text-decoration:none;
+color:white;
+font-weight:bold;
+transition:0.3s;
 }
 
 .link:hover{
-    transform:translateY(-3px);
-    background:#333;
+transform:translateY(-3px);
+background:#333;
 }
 
 body.light .link{
-    background:white;
-    color:#111;
+background:white;
+color:#111;
 }
 
 /* FOOTER */
 footer{
-    text-align:center;
-    padding:20px;
-    margin-top:40px;
-    width:100%;
-    background:#111;
-    color:white;
+text-align:center;
+padding:20px;
+margin-top:40px;
+width:100%;
+background:#111;
+color:white;
 }
 
 body.light footer{
-    background:#ddd;
-    color:#111;
+background:#ddd;
+color:#111;
 }
 
 </style>
@@ -136,32 +145,32 @@ body.light footer{
 
 <div class="container">
 
-    <!-- Theme Button -->
-    <button id="themeToggle" class="theme-btn">
-        <i class="fa-solid fa-moon"></i>
-    </button>
+<!-- Theme Button -->
+<button id="themeToggle" class="theme-btn">
+<i class="fa-solid fa-moon"></i>
+</button>
 
-    <!-- Profile -->
-    <div class="profile">
-        <img src="https://i.pravatar.cc/200" alt="Profile picture">
-        <h2>@yourname</h2>
+<!-- Profile -->
+<div class="profile">
+<img src="https://i.pravatar.cc/200" alt="Profile picture">
+<h2>@yourname</h2>
 
-        <div class="socials">
-            <a href="#"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-            <a href="#"><i class="fa-brands fa-youtube"></i></a>
-            <a href="#"><i class="fa-brands fa-facebook"></i></a>
-        </div>
-    </div>
+<div class="socials">
+<a href="#"><i class="fa-brands fa-instagram"></i></a>
+<a href="#"><i class="fa-brands fa-tiktok"></i></a>
+<a href="#"><i class="fa-brands fa-youtube"></i></a>
+<a href="#"><i class="fa-brands fa-facebook"></i></a>
+</div>
+</div>
 
-    <!-- Links -->
-    <div class="links">
-        <a class="link" href="#">About Me</a>
-        <a class="link" href="#">My Website</a>
-        <a class="link" href="#">Shop</a>
-        <a class="link" href="#">Portfolio</a>
-        <a class="link" href="#">Contact</a>
-    </div>
+<!-- Links -->
+<div class="links">
+<a class="link" href="#">About Me</a>
+<a class="link" href="#">My Website</a>
+<a class="link" href="#">Shop</a>
+<a class="link" href="#">Portfolio</a>
+<a class="link" href="#">Contact</a>
+</div>
 
 </div>
 
@@ -175,11 +184,11 @@ body.light footer{
 const toggleBtn = document.getElementById("themeToggle");
 
 toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light");
+document.body.classList.toggle("light");
 
-    const icon = toggleBtn.querySelector("i");
-    icon.classList.toggle("fa-moon");
-    icon.classList.toggle("fa-sun");
+const icon = toggleBtn.querySelector("i");
+icon.classList.toggle("fa-moon");
+icon.classList.toggle("fa-sun");
 });
 
 </script>
