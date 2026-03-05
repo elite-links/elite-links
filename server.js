@@ -151,8 +151,10 @@ const upload = multer({
 ============================== */
 
 /* ---- HOME ---- */
-app.get("/", (_, res) => {
-  res.send("🔥 Elite Links running");
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
 });
 
 /* ---- REGISTER ---- */
