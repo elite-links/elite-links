@@ -99,6 +99,7 @@ const Profile = mongoose.model(
 ============================== */
 
 function auth(req, res, next) {
+
   const header = req.headers.authorization;
 
   if (!header?.startsWith("Bearer "))
@@ -114,16 +115,20 @@ function auth(req, res, next) {
 }
 
 function sessionAuth(req, res, next) {
+
   if (!req.session.user) {
     return res.redirect("/login.html");
   }
+
   next();
 }
 
 function admin(req, res, next) {
+
   if (req.user.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
   }
+
   next();
 }
 
@@ -145,14 +150,16 @@ const upload = multer({
    ROUTES
 ============================== */
 
-/* HOME */
+/* ---- HOME ---- */
 app.get("/", (_, res) => {
   res.send("🔥 Elite Links running");
 });
 
-/* REGISTER */
+/* ---- REGISTER ---- */
 app.post("/api/register", async (req, res, next) => {
+
   try {
+
     const { email, password } = req.body;
 
     if (!email || !password)
@@ -163,7 +170,10 @@ app.post("/api/register", async (req, res, next) => {
 
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({ email, password: hash });
+    await User.create({
+      email,
+      password: hash
+    });
 
     res.json({ message: "✅ Registered" });
 
@@ -172,11 +182,13 @@ app.post("/api/register", async (req, res, next) => {
   }
 });
 
-/* LOGIN */
+/* ---- LOGIN ---- */
 app.post("/api/login", async (req, res, next) => {
+
   try {
 
     const { email, password } = req.body;
+
     const user = await User.findOne({ email });
 
     if (!user)
@@ -203,30 +215,38 @@ app.post("/api/login", async (req, res, next) => {
   }
 });
 
-/* DASHBOARD API */
+/* ---- DASHBOARD API ---- */
 app.get("/api/dashboard", auth, (req, res) => {
   res.json({ message: "🔥 Member Access Granted" });
 });
 
-/* ADMIN PANEL */
+/* ---- ADMIN PANEL ---- */
 app.get("/api/admin", auth, admin, (_, res) => {
   res.json({ message: "👑 Admin Panel" });
 });
 
-/* LIST USERS */
+/* ---- LIST USERS ---- */
 app.get("/api/users", auth, admin, async (_, res) => {
+
   const users = await User.find().select("-password");
+
   res.json(users);
 });
 
-/* FILE UPLOAD */
+/* ---- FILE UPLOAD ---- */
 app.post("/api/upload", auth, upload.single("file"), (req, res) => {
-  res.json({ url: `/uploads/${req.file.filename}` });
+
+  res.json({
+    url: `/uploads/${req.file.filename}`
+  });
+
 });
 
-/* CREATE PROFILE */
+/* ---- CREATE PROFILE ---- */
 app.post("/create-profile", sessionAuth, async (req, res, next) => {
+
   try {
+
     await Profile.create({
       userId: req.session.user,
       ...req.body
@@ -237,14 +257,19 @@ app.post("/create-profile", sessionAuth, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 });
 
-/* DASHBOARD PAGE */
+/* ---- DASHBOARD PAGE ---- */
 app.get("/dashboard.html", sessionAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+
+  res.sendFile(
+    path.join(__dirname, "public", "dashboard.html")
+  );
+
 });
 
-/* SITEMAP */
+/* ---- SITEMAP ---- */
 app.get("/sitemap.xml", async (_, res) => {
 
   const profiles = await Profile.find();
@@ -260,19 +285,24 @@ app.get("/sitemap.xml", async (_, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>`);
+
 });
 
-/* PUBLIC PROFILE */
+/* ---- PUBLIC PROFILE ---- */
 app.get("/:username", async (req, res) => {
 
   const profile = await Profile.findOne({
     username: req.params.username
   });
 
-  if (!profile)
+  if (!profile) {
     return res.status(404).send("Profile not found");
+  }
 
-  res.sendFile(path.join(__dirname, "public", "profile.html"));
+  res.sendFile(
+    path.join(__dirname, "public", "profile.html")
+  );
+
 });
 
 /* ==============================
@@ -286,6 +316,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     error: err.message
   });
+
 });
 
 /* ==============================

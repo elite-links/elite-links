@@ -1,15 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>User Profile</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  margin:0;
+}
+
+.container{
+  max-width:600px;
+  margin:60px auto;
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+.link{
+  display:block;
+  padding:10px;
+  margin:8px 0;
+  background:#f0f0f0;
+  border-radius:6px;
+  text-decoration:none;
+  color:#333;
+  transition:0.2s;
+}
+
+.link:hover{
+  background:#e4e4e4;
+}
+</style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h1 id="username"></h1>
+<h1 id="username">Loading...</h1>
 
 <div id="links"></div>
 
@@ -17,30 +54,45 @@
 
 <script>
 
-const username = location.pathname.split("/").pop();
+const username = window.location.pathname.split("/").pop();
 
 async function loadProfile(){
 
-const res = await fetch("/api/profile/" + username);
+try{
+
+const res = await fetch("/api/profile/" + encodeURIComponent(username));
+
+if(!res.ok){
+throw new Error("Profile not found");
+}
+
 const data = await res.json();
 
-document.getElementById("username").innerText = data.username;
+document.getElementById("username").textContent = data.username;
 
 const links = document.getElementById("links");
-
 links.innerHTML = "";
 
 for(const key in data){
 
 if(data[key] && key !== "_id" && key !== "username"){
 
-links.innerHTML += `
-<a class="link" href="${data[key]}" target="_blank">
-${key}
-</a>
-`;
+const a = document.createElement("a");
+a.className = "link";
+a.href = data[key];
+a.target = "_blank";
+a.textContent = key;
+
+links.appendChild(a);
 
 }
+
+}
+
+}catch(err){
+
+document.getElementById("username").textContent = "User not found";
+console.error(err);
 
 }
 

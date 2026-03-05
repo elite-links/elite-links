@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -8,37 +9,36 @@
 <body>
 
 <div class="box">
+  <h2>Elite Dashboard</h2>
 
-<h2>Elite Dashboard</h2>
+  <p id="welcome"></p>
 
-<p id="welcome"></p>
+  <a class="link" href="create.html">Create Profile</a>
 
-<a class="link" href="create.html">Create Profile</a>
+  <br><br>
 
-<br><br>
-
-<button onclick="logout()">Logout</button>
-
+  <button onclick="logout()">Logout</button>
 </div>
 
 <script>
-
+// Get data from localStorage
 const token = localStorage.getItem("token");
 const username = localStorage.getItem("username");
 
-if(!token){
-window.location="login.html";
+// If no token -> redirect to login
+if (!token) {
+  window.location.href = "login.html";
 }
 
-document.getElementById("welcome").innerText =
-"Welcome " + username;
+// Show welcome message
+document.getElementById("welcome").innerText = "Welcome " + (username || "User");
 
-function logout(){
-localStorage.removeItem("token");
-localStorage.removeItem("username");
-window.location="login.html";
+// Logout function
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  window.location.href = "login.html";
 }
-
 </script>
 
 </body>
