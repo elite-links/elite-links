@@ -1,5 +1,5 @@
 /* ==============================
-   LOAD ENV
+   LOAD ENV FIRST
 ============================== */
 require("dotenv").config();
 
@@ -180,6 +180,7 @@ app.post("/api/register", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 });
 
 /* ---- LOGIN ---- */
@@ -213,6 +214,7 @@ app.post("/api/login", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 });
 
 /* ---- DASHBOARD API ---- */
@@ -231,6 +233,7 @@ app.get("/api/users", auth, admin, async (_, res) => {
   const users = await User.find().select("-password");
 
   res.json(users);
+
 });
 
 /* ---- FILE UPLOAD ---- */
