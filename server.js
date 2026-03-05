@@ -25,6 +25,7 @@ const app = express();
 /* ==============================
    MIDDLEWARE
 ============================== */
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,11 +40,13 @@ app.use(
 /* ==============================
    STATIC FILES
 ============================== */
+
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ==============================
-   UPLOADS
+   UPLOAD FOLDER
 ============================== */
+
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -52,6 +55,7 @@ app.use("/uploads", express.static(UPLOAD_DIR));
 /* ==============================
    DATABASE
 ============================== */
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
@@ -63,6 +67,7 @@ mongoose
 /* ==============================
    MODELS
 ============================== */
+
 const User = mongoose.model(
   "User",
   new mongoose.Schema({
@@ -123,7 +128,7 @@ function admin(req, res, next) {
 }
 
 /* ==============================
-   MULTER
+   MULTER UPLOAD
 ============================== */
 
 const upload = multer({
@@ -140,12 +145,12 @@ const upload = multer({
    ROUTES
 ============================== */
 
-/* ---- HOME ---- */
+/* HOME */
 app.get("/", (_, res) => {
   res.send("🔥 Elite Links running");
 });
 
-/* ---- REGISTER ---- */
+/* REGISTER */
 app.post("/api/register", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -158,10 +163,7 @@ app.post("/api/register", async (req, res, next) => {
 
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({
-      email,
-      password: hash
-    });
+    await User.create({ email, password: hash });
 
     res.json({ message: "✅ Registered" });
 
@@ -170,11 +172,11 @@ app.post("/api/register", async (req, res, next) => {
   }
 });
 
-/* ---- LOGIN ---- */
+/* LOGIN */
 app.post("/api/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
 
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user)
@@ -201,33 +203,30 @@ app.post("/api/login", async (req, res, next) => {
   }
 });
 
-/* ---- DASHBOARD API ---- */
+/* DASHBOARD API */
 app.get("/api/dashboard", auth, (req, res) => {
   res.json({ message: "🔥 Member Access Granted" });
 });
 
-/* ---- ADMIN PANEL ---- */
+/* ADMIN PANEL */
 app.get("/api/admin", auth, admin, (_, res) => {
   res.json({ message: "👑 Admin Panel" });
 });
 
-/* ---- LIST USERS ---- */
+/* LIST USERS */
 app.get("/api/users", auth, admin, async (_, res) => {
   const users = await User.find().select("-password");
   res.json(users);
 });
 
-/* ---- FILE UPLOAD ---- */
+/* FILE UPLOAD */
 app.post("/api/upload", auth, upload.single("file"), (req, res) => {
-  res.json({
-    url: `/uploads/${req.file.filename}`
-  });
+  res.json({ url: `/uploads/${req.file.filename}` });
 });
 
-/* ---- CREATE PROFILE ---- */
+/* CREATE PROFILE */
 app.post("/create-profile", sessionAuth, async (req, res, next) => {
   try {
-
     await Profile.create({
       userId: req.session.user,
       ...req.body
@@ -240,12 +239,12 @@ app.post("/create-profile", sessionAuth, async (req, res, next) => {
   }
 });
 
-/* ---- DASHBOARD PAGE ---- */
+/* DASHBOARD PAGE */
 app.get("/dashboard.html", sessionAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-/* ---- SITEMAP ---- */
+/* SITEMAP */
 app.get("/sitemap.xml", async (_, res) => {
 
   const profiles = await Profile.find();
@@ -253,37 +252,33 @@ app.get("/sitemap.xml", async (_, res) => {
   const urls = profiles.map(p => `
 <url>
 <loc>https://elite-links.onrender.com/${p.username}</loc>
-</url>
-`).join("");
+</url>`).join("");
 
   res.header("Content-Type", "application/xml");
 
   res.send(`
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
-</urlset>
-`);
-
+</urlset>`);
 });
 
-/* ---- PUBLIC PROFILE ---- */
+/* PUBLIC PROFILE */
 app.get("/:username", async (req, res) => {
 
   const profile = await Profile.findOne({
     username: req.params.username
   });
 
-  if (!profile) {
+  if (!profile)
     return res.status(404).send("Profile not found");
-  }
 
   res.sendFile(path.join(__dirname, "public", "profile.html"));
-
 });
 
 /* ==============================
    ERROR HANDLER
 ============================== */
+
 app.use((err, req, res, next) => {
 
   console.error(err);
@@ -291,7 +286,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     error: err.message
   });
-
 });
 
 /* ==============================

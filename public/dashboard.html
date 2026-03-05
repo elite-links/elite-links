@@ -9,14 +9,12 @@
 
 <div class="box">
 
-<h1>Members Area</h1>
+<h2>Elite Dashboard</h2>
 
-<p>Welcome <span id="user"></span></p>
+<p id="welcome"></p>
 
-<a href="create.html">Create Your Link Profile</a>
-<br><br>
+<a class="link" href="create.html">Create Profile</a>
 
-<a href="https://drive.google.com" target="_blank">Download Files</a>
 <br><br>
 
 <button onclick="logout()">Logout</button>
@@ -25,22 +23,20 @@
 
 <script>
 
-// check login token
 const token = localStorage.getItem("token");
+const username = localStorage.getItem("username");
 
 if(!token){
-  window.location = "login.html";
+window.location="login.html";
 }
 
-// show username
-document.getElementById("user").textContent =
-localStorage.getItem("username");
+document.getElementById("welcome").innerText =
+"Welcome " + username;
 
-// logout function
 function logout(){
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
-  window.location = "login.html";
+localStorage.removeItem("token");
+localStorage.removeItem("username");
+window.location="login.html";
 }
 
 </script>

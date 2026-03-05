@@ -1,72 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Create Profile</title>
+<title>Create Profile</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+<div class="box">
 
 <h2>Create Your Elite Profile</h2>
 
 <form id="profileForm">
 
-<input type="text" name="username" placeholder="Username" required><br><br>
+<input name="username" placeholder="Username" required>
 
-<input type="text" name="facebook" placeholder="Facebook Link"><br>
-<input type="text" name="instagram" placeholder="Instagram Link"><br>
-<input type="text" name="tiktok" placeholder="TikTok Link"><br>
-<input type="text" name="youtube" placeholder="YouTube Link"><br>
+<input name="facebook" placeholder="Facebook Link">
+<input name="instagram" placeholder="Instagram Link">
+<input name="tiktok" placeholder="TikTok Link">
+<input name="youtube" placeholder="YouTube Link">
 
-<input type="text" name="shop" placeholder="Shop Link"><br>
-<input type="text" name="website" placeholder="Website"><br>
+<input name="shop" placeholder="Shop Link">
+<input name="website" placeholder="Website">
 
-<textarea name="about" placeholder="About Me"></textarea><br><br>
+<textarea name="about" placeholder="About Me"></textarea>
 
 <button type="submit">Save Profile</button>
 
 </form>
 
+</div>
+
 <script>
 
-// check login token
 const token = localStorage.getItem("token");
 
-if (!token) {
-  window.location = "login.html";
+if(!token){
+  window.location="login.html";
 }
 
-// form submit
 document.getElementById("profileForm")
-.addEventListener("submit", async (e) => {
+.addEventListener("submit", async(e)=>{
 
-  e.preventDefault();
+e.preventDefault();
 
-  const data = Object.fromEntries(
-    new FormData(e.target)
-  );
+const data = Object.fromEntries(
+  new FormData(e.target)
+);
 
-  try {
+const res = await fetch("/api/profile",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+body:JSON.stringify(data)
+});
 
-    const res = await fetch("/create-profile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
-      },
-      body: JSON.stringify(data)
-    });
-
-    if (res.ok) {
-      alert("Profile created!");
-      window.location = "dashboard.html";
-    } else {
-      const msg = await res.text();
-      alert("Error: " + msg);
-    }
-
-  } catch (err) {
-    alert("Server connection error");
-  }
+if(res.ok){
+alert("Profile created!");
+window.location="dashboard.html";
+}else{
+alert("Error creating profile");
+}
 
 });
 

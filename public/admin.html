@@ -2,64 +2,28 @@
 <html>
 <head>
 <title>Elite Admin Panel</title>
-
-<style>
-body{
-  background:black;
-  color:#00ff99;
-  font-family:monospace;
-}
-
-.card{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-
-td,th{
-  border:1px solid #00ff99;
-  padding:10px;
-  text-align:left;
-}
-
-h1{
-  text-align:center;
-}
-
-button{
-  background:#00ff99;
-  border:none;
-  padding:10px 15px;
-  cursor:pointer;
-  font-weight:bold;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="card">
 
-<h1>🔥 ELITE ADMIN CONTROL PANEL</h1>
+<h1>Elite Admin Panel</h1>
 
 <button onclick="loadUsers()">Show Members</button>
 
 <table>
+
 <thead>
 <tr>
 <th>Email</th>
-<th>Paid</th>
 <th>Role</th>
 </tr>
 </thead>
 
 <tbody id="users"></tbody>
+
 </table>
 
 </div>
@@ -68,40 +32,40 @@ button{
 
 async function loadUsers(){
 
-  const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
 
-  if(!token){
-    alert("Login required");
-    window.location="login.html";
-    return;
-  }
+if(!token){
+window.location="login.html";
+}
 
-  const res = await fetch("/api/users",{
-    headers:{
-      "Authorization":"Bearer " + token
-    }
-  });
+const res = await fetch("/api/users",{
+headers:{
+"Authorization":"Bearer "+token
+}
+});
 
-  if(!res.ok){
-    alert("Admin access required");
-    window.location="login.html";
-    return;
-  }
+if(!res.ok){
+alert("Admin only");
+return;
+}
 
-  const users = await res.json();
+const users = await res.json();
 
-  const table = document.getElementById("users");
-  table.innerHTML = "";
+const table = document.getElementById("users");
 
-  users.forEach(u=>{
-    table.innerHTML += `
-      <tr>
-        <td>${u.email}</td>
-        <td>${u.paid}</td>
-        <td>${u.role}</td>
-      </tr>
-    `;
-  });
+table.innerHTML="";
+
+users.forEach(u=>{
+
+table.innerHTML += `
+<tr>
+<td>${u.email}</td>
+<td>${u.role}</td>
+</tr>
+`;
+
+});
+
 }
 
 </script>
