@@ -1,17 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
 <h1 id="name"></h1>
+<h2 id="username"></h2>
+
 <div id="links"></div>
 
+</div>
+
 <script>
-const username = location.pathname.replace("/","");
 
-fetch("/api/"+username)
-.then(r=>r.json())
-.then(data=>{
- document.getElementById("name").innerText=data.username;
+// get username from URL
+const username = location.pathname.split("/").pop();
 
- data.links.forEach(link=>{
-   document.getElementById("links").innerHTML+=
-   `<a href="${link.url}">${link.title}</a><br>`;
- });
-});
+async function loadProfile(){
+
+  try {
+
+    const res = await fetch("/api/profile/" + username);
+    const data = await res.json();
+
+    // show username
+    document.getElementById("name").textContent = data.username;
+    document.getElementById("username").textContent = data.username;
+
+    const linksDiv = document.getElementById("links");
+    linksDiv.innerHTML = "";
+
+    // if links is an array
+    if (Array.isArray(data.links)) {
+      data.links.forEach(link => {
+        linksDiv.innerHTML += `
+          <a class="link" href="${link.url}" target="_blank">
+            ${link.title}
+          </a><br>
+        `;
+      });
+    }
+
+    // if links is an object
+    else {
+      for (const key in data.links) {
+        if (data.links[key]) {
+          linksDiv.innerHTML += `
+            <a class="link" href="${data.links[key]}" target="_blank">
+              ${key}
+            </a><br>
+          `;
+        }
+      }
+    }
+
+  } catch (err) {
+    console.error("Error loading profile:", err);
+  }
+
+}
+
+loadProfile();
+
 </script>
+
+</body>
+</html>

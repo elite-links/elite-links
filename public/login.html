@@ -19,6 +19,11 @@
   </form>
 
   <p id="error"></p>
+
+  <p>
+    No account?
+    <a href="register.html">Create one</a>
+  </p>
 </div>
 
 <script>
@@ -29,8 +34,7 @@ if (token) {
 }
 
 /* Login handler */
-document.getElementById("loginForm")
-.addEventListener("submit", async (e) => {
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const data = Object.fromEntries(new FormData(e.target));

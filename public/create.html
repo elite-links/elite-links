@@ -27,22 +27,49 @@
 </form>
 
 <script>
+
+// check login token
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location = "login.html";
+}
+
+// form submit
 document.getElementById("profileForm")
 .addEventListener("submit", async (e) => {
+
   e.preventDefault();
 
   const data = Object.fromEntries(
     new FormData(e.target)
   );
 
-  const res = await fetch("/create-profile", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+  try {
 
-  alert(await res.text());
+    const res = await fetch("/create-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      alert("Profile created!");
+      window.location = "dashboard.html";
+    } else {
+      const msg = await res.text();
+      alert("Error: " + msg);
+    }
+
+  } catch (err) {
+    alert("Server connection error");
+  }
+
 });
+
 </script>
 
 </body>

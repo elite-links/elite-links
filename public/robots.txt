@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://elite-links.onrender.com/sitemap.xml

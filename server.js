@@ -26,12 +26,13 @@ const app = express();
    MIDDLEWARE
 ============================== */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: "elite-links-secret",
+    secret: process.env.SESSION_SECRET || "elite-links-secret",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: false
   })
 );
 
@@ -91,6 +92,7 @@ const Profile = mongoose.model(
 /* ==============================
    AUTH MIDDLEWARE
 ============================== */
+
 function auth(req, res, next) {
   const header = req.headers.authorization;
 
@@ -107,27 +109,29 @@ function auth(req, res, next) {
 }
 
 function sessionAuth(req, res, next) {
-  if (!req.session.user)
+  if (!req.session.user) {
     return res.redirect("/login.html");
-
+  }
   next();
 }
 
 function admin(req, res, next) {
-  if (req.user.role !== "admin")
+  if (req.user.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
-
+  }
   next();
 }
 
 /* ==============================
    MULTER
 ============================== */
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_, __, cb) => cb(null, UPLOAD_DIR),
-    filename: (_, file, cb) =>
-      cb(null, Date.now() + path.extname(file.originalname))
+    filename: (_, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+    }
   }),
   limits: { fileSize: 5 * 1024 * 1024 }
 });
@@ -154,9 +158,13 @@ app.post("/api/register", async (req, res, next) => {
 
     const hash = await bcrypt.hash(password, 10);
 
-    await User.create({ email, password: hash });
+    await User.create({
+      email,
+      password: hash
+    });
 
     res.json({ message: "✅ Registered" });
+
   } catch (err) {
     next(err);
   }
@@ -168,6 +176,7 @@ app.post("/api/login", async (req, res, next) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+
     if (!user)
       return res.status(401).json({ error: "User not found" });
 
@@ -186,21 +195,23 @@ app.post("/api/login", async (req, res, next) => {
     req.session.user = user._id;
 
     res.json({ token });
+
   } catch (err) {
     next(err);
   }
 });
 
 /* ---- DASHBOARD API ---- */
-app.get("/api/dashboard", auth, (_, res) => {
+app.get("/api/dashboard", auth, (req, res) => {
   res.json({ message: "🔥 Member Access Granted" });
 });
 
-/* ---- ADMIN ---- */
-app.get("/api/admin", auth, admin, (_, res) =>
-  res.json({ message: "👑 Admin Panel" })
-);
+/* ---- ADMIN PANEL ---- */
+app.get("/api/admin", auth, admin, (_, res) => {
+  res.json({ message: "👑 Admin Panel" });
+});
 
+/* ---- LIST USERS ---- */
 app.get("/api/users", auth, admin, async (_, res) => {
   const users = await User.find().select("-password");
   res.json(users);
@@ -208,18 +219,22 @@ app.get("/api/users", auth, admin, async (_, res) => {
 
 /* ---- FILE UPLOAD ---- */
 app.post("/api/upload", auth, upload.single("file"), (req, res) => {
-  res.json({ url: `/uploads/${req.file.filename}` });
+  res.json({
+    url: `/uploads/${req.file.filename}`
+  });
 });
 
 /* ---- CREATE PROFILE ---- */
 app.post("/create-profile", sessionAuth, async (req, res, next) => {
   try {
+
     await Profile.create({
       userId: req.session.user,
       ...req.body
     });
 
     res.redirect("/dashboard.html");
+
   } catch (err) {
     next(err);
   }
@@ -232,13 +247,14 @@ app.get("/dashboard.html", sessionAuth, (req, res) => {
 
 /* ---- SITEMAP ---- */
 app.get("/sitemap.xml", async (_, res) => {
+
   const profiles = await Profile.find();
 
   const urls = profiles.map(p => `
-    <url>
-      <loc>https://elite-links.onrender.com/${p.username}</loc>
-    </url>
-  `).join("");
+<url>
+<loc>https://elite-links.onrender.com/${p.username}</loc>
+</url>
+`).join("");
 
   res.header("Content-Type", "application/xml");
 
@@ -247,33 +263,43 @@ app.get("/sitemap.xml", async (_, res) => {
 ${urls}
 </urlset>
 `);
+
 });
 
-/* ---- PUBLIC PROFILE (MUST BE LAST ROUTE) ---- */
+/* ---- PUBLIC PROFILE ---- */
 app.get("/:username", async (req, res) => {
+
   const profile = await Profile.findOne({
     username: req.params.username
   });
 
-  if (!profile)
+  if (!profile) {
     return res.status(404).send("Profile not found");
+  }
 
   res.sendFile(path.join(__dirname, "public", "profile.html"));
+
 });
 
 /* ==============================
    ERROR HANDLER
 ============================== */
 app.use((err, req, res, next) => {
+
   console.error(err);
-  res.status(500).json({ error: err.message });
+
+  res.status(500).json({
+    error: err.message
+  });
+
 });
 
 /* ==============================
    START SERVER
 ============================== */
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

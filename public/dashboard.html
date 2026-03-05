@@ -11,22 +11,39 @@
 
 <h1>Members Area</h1>
 
-<a href="https://drive.google.com" target="_blank">
-Download Files
-</a>
+<p>Welcome <span id="user"></span></p>
+
+<a href="create.html">Create Your Link Profile</a>
+<br><br>
+
+<a href="https://drive.google.com" target="_blank">Download Files</a>
+<br><br>
 
 <button onclick="logout()">Logout</button>
 
 </div>
 
-<script src="app.js"></script>
-</body>
-</html>
-<button onclick="logout()">Logout</button>
-
 <script>
+
+// check login token
+const token = localStorage.getItem("token");
+
+if(!token){
+  window.location = "login.html";
+}
+
+// show username
+document.getElementById("user").textContent =
+localStorage.getItem("username");
+
+// logout function
 function logout(){
   localStorage.removeItem("token");
-  window.location="login.html";
+  localStorage.removeItem("username");
+  window.location = "login.html";
 }
+
 </script>
+
+</body>
+</html>
