@@ -1,276 +1,282 @@
 /* ===================================
    ROOT VARIABLES (THEME SYSTEM)
 =================================== */
-
-:root{
---bg:linear-gradient(135deg,#ff8fb1,#ff4d88);
---card:rgba(255,255,255,.9);
---text:#111;
---shadow:0 15px 40px rgba(0,0,0,.2);
+:root {
+  --bg-gradient: linear-gradient(135deg, #ff8fb1, #ff4d88);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --text-color: #111;
+  --shadow-light: 0 15px 40px rgba(0, 0, 0, 0.2);
+  --shadow-dark: 0 15px 40px rgba(0, 0, 0, 0.6);
+  --primary-btn-bg: #000;
+  --primary-btn-hover: #333;
+  --download-btn-bg: #00ff88;
 }
 
-body.dark{
---bg:#0f0f0f;
---card:rgba(30,30,30,.9);
---text:#fff;
---shadow:0 15px 40px rgba(0,0,0,.6);
+body.dark {
+  --bg-gradient: #0f0f0f;
+  --card-bg: rgba(30, 30, 30, 0.9);
+  --text-color: #fff;
+  --shadow-light: var(--shadow-dark);
 }
 
-/* ===================================
-   RESET
-=================================== */
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:system-ui,-apple-system,sans-serif;
-}
-
-body{
-min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:var(--bg);
-color:var(--text);
-transition:.4s;
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-gradient);
+  color: var(--text-color);
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: all 0.4s ease;
 }
 
 /* ===================================
-   MAIN CONTAINER
+   CONTAINER
 =================================== */
-
-.container{
-width:100%;
-max-width:420px;
-padding:25px;
-text-align:center;
-animation:fadeIn .7s ease;
-position:relative; /* FIXED theme button position */
+.container {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px;
+  text-align: center;
+  position: relative;
+  animation: fadeIn 0.7s ease;
 }
 
 /* ===================================
-   PROFILE
+   PROFILE SECTION
 =================================== */
-
-.profile img{
-width:110px;
-height:110px;
-border-radius:50%;
-object-fit:cover;
-border:4px solid #fff;
-box-shadow:var(--shadow);
-animation:pop .6s ease;
+.profile img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: var(--shadow-light);
+  animation: pop 0.6s ease;
 }
 
-.profile h2{
-margin-top:12px;
-font-weight:600;
-color:var(--text);
+.profile h2 {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--text-color);
 }
 
 /* ===================================
    SOCIAL ICONS
 =================================== */
-
-.socials{
-margin-top:10px;
+.socials {
+  margin-top: 12px;
 }
 
-.socials a{
-font-size:22px;
-margin:0 12px;
-color:var(--text);
-transition:.3s;
+.socials a {
+  font-size: 22px;
+  margin: 0 12px;
+  color: var(--text-color);
+  transition: transform 0.3s ease, color 0.3s ease;
 }
 
-.socials a:hover{
-transform:translateY(-4px) scale(1.15);
-}
-
-/* ===================================
-   LINKS
-=================================== */
-
-.links{
-margin-top:30px;
-display:flex;
-flex-direction:column;
-gap:15px;
-}
-
-.link{
-display:block;
-padding:16px;
-border-radius:14px;
-text-decoration:none;
-font-weight:600;
-color:var(--text);
-background:var(--card);
-backdrop-filter:blur(14px);
-box-shadow:var(--shadow);
-transition:.3s;
-position:relative;
-overflow:hidden;
-}
-
-/* Shine Hover Animation */
-
-.link::before{
-content:"";
-position:absolute;
-inset:0;
-background:linear-gradient(
-120deg,
-transparent,
-rgba(255,255,255,.4),
-transparent
-);
-transform:translateX(-100%);
-transition:.6s;
-}
-
-.link:hover::before{
-transform:translateX(100%);
-}
-
-.link:hover{
-transform:translateY(-6px);
+.socials a:hover {
+  transform: translateY(-4px) scale(1.15);
+  color: #ff4d88;
 }
 
 /* ===================================
-   LOGIN / DASHBOARD CARDS
+   LINKS / NAV CARDS
 =================================== */
+.links {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
+.link {
+  position: relative;
+  display: block;
+  padding: 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--text-color);
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.link:hover::before {
+  transform: translateX(100%);
+}
+
+.link:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* ===================================
+   CARDS & BOXES
+=================================== */
 .box,
-.card{
-background:var(--card);
-padding:30px;
-border-radius:14px;
-width:320px;
-text-align:center;
-box-shadow:var(--shadow);
+.card {
+  width: 320px;
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-light);
 }
 
 /* ===================================
    INPUTS
 =================================== */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  transition: border 0.3s ease;
+}
 
-input{
-width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:15px;
+input:focus {
+  outline: none;
+  border-color: #ff4d88;
 }
 
 /* ===================================
    BUTTONS
 =================================== */
-
-button{
-width:100%;
-padding:12px;
-margin-top:10px;
-background:black;
-color:white;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-transition:.3s;
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: var(--primary-btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
-button:hover{
-background:#333;
+button:hover {
+  background: var(--primary-btn-hover);
+  transform: translateY(-2px);
 }
 
-/* Download Button */
+/* DOWNLOAD BUTTON */
+a.download {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  background: var(--download-btn-bg);
+  color: #000;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
 
-a.download{
-display:inline-block;
-margin-top:15px;
-text-decoration:none;
-font-weight:bold;
-background:#00ff88;
-padding:12px 22px;
-border-radius:8px;
-color:black;
+a.download:hover {
+  transform: translateY(-2px);
+  background: #00cc70;
 }
 
 /* ===================================
    ERROR MESSAGES
 =================================== */
-
 #error,
-#loginError{
-color:red;
-margin-top:10px;
+#loginError {
+  color: #ff4d4d;
+  margin-top: 10px;
+  font-weight: 500;
 }
 
 /* ===================================
    ADMIN PANEL
 =================================== */
-
-.admin{
-margin-top:30px;
-background:var(--card);
-padding:15px;
-border-radius:12px;
-box-shadow:var(--shadow);
+.admin {
+  margin-top: 30px;
+  background: var(--card-bg);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
 }
 
 /* ===================================
    THEME BUTTON
 =================================== */
+.theme-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border: none;
+  background: var(--card-bg);
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow-light);
+  font-size: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-.theme-btn{
-position:absolute;
-top:20px;
-right:20px;
-border:none;
-background:var(--card);
-padding:12px;
-border-radius:50%;
-cursor:pointer;
-box-shadow:var(--shadow);
-font-size:16px;
+.theme-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 /* ===================================
    ANIMATIONS
 =================================== */
-
-@keyframes fadeIn{
-from{opacity:0; transform:translateY(20px);}
-to{opacity:1; transform:none;}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes pop{
-from{transform:scale(.7); opacity:0;}
-to{transform:scale(1); opacity:1;}
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ===================================
    MOBILE RESPONSIVE
 =================================== */
+@media (max-width: 480px) {
+  .container {
+    padding: 18px;
+  }
 
-@media(max-width:480px){
+  .profile img {
+    width: 90px;
+    height: 90px;
+  }
 
-.container{
-padding:18px;
-}
-
-.profile img{
-width:90px;
-height:90px;
-}
-
-.box,
-.card{
-width:90%;
-}
-
+  .box,
+  .card {
+    width: 90%;
+  }
 }
